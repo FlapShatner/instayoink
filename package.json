@@ -1,5 +1,5 @@
 {
-  "name": "instagram-download-browser-extension",
+  "name": "instayoink",
   "version": "2.3.0",
   "description": "",
   "main": "index.js",
@@ -18,13 +18,13 @@
     "extension"
   ],
   "author": {
-    "name": "Konka",
-    "email": "1094918@gmail.com"
+    "name": "Jordan Roberts",
+    "email": "jrobertswebdev@gmail.com"
   },
-  "homepage": "https://github.com/TheKonka/instagram-download-browser-extension",
+  "homepage": "https://github.com/FlapShatner/instayoink",
   "bugs": {
-    "url": "https://github.com/TheKonka/instagram-download-browser-extension/issues",
-    "email": "1094918@gmail.com"
+    "url": "https://github.com/FlapShatner/instayoink/issues",
+    "email": "jrobertswebdev@gmail.com"
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {

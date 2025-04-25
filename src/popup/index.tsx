@@ -109,7 +109,7 @@ function App() {
             className="github"
             target="_black"
             rel="noopener,noreferrer"
-            href="https://github.com/TheKonka/instagram-download-browser-extension"
+            href="https://github.com/FlapShatner/instayoink"
           >
             <GithubIcon />
           </a>

@@ -1,6 +1,5 @@
-## instagram-download-browser-extension
+## instayoink
 
-Install on [Chrome](https://chrome.google.com/webstore/detail/media-resources-enhancer/oejjpeobjicdpgaijialfpfcbdnanajk) or [Firefox](https://addons.mozilla.org/addon/ins-downloader/)
 
 ![image](https://github.com/TheKonka/instagram-download-browser-extension/assets/22173084/3ee34a30-5747-4a98-a129-bf030182f1d8)
 ![image](https://github.com/TheKonka/instagram-download-browser-extension/assets/22173084/f6988f38-46fc-4c9c-a37e-35a25e71dbe4)
