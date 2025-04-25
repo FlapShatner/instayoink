@@ -1,0 +1,54 @@
+{
+  "name": "instagram-download-browser-extension",
+  "version": "2.3.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build:chrome": "tsc --noEmit && node esbuild.config.mjs chrome",
+    "build:ff": "tsc --noEmit && node esbuild.config.mjs firefox",
+    "android": "cd dist/firefox && node ../../node_modules/web-ext/bin/web-ext.js run -t firefox-android --android-device=45lrfakru8a6kzyh --firefox-apk org.mozilla.fenix",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint --fix"
+  },
+  "keywords": [
+    "instagram",
+    "download",
+    "browser",
+    "extension"
+  ],
+  "author": {
+    "name": "Konka",
+    "email": "1094918@gmail.com"
+  },
+  "homepage": "https://github.com/TheKonka/instagram-download-browser-extension",
+  "bugs": {
+    "url": "https://github.com/TheKonka/instagram-download-browser-extension/issues",
+    "email": "1094918@gmail.com"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@types/firefox-webext-browser": "^120.0.4",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "chrome-types": "^0.1.335",
+    "esbuild": "^0.24.2",
+    "esbuild-sass-plugin": "^3.3.1",
+    "eslint": "^9.19.0",
+    "globals": "^15.14.0",
+    "sass": "^1.83.4",
+    "sass-embedded": "^1.83.4",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.22.0",
+    "web-ext": "^8.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

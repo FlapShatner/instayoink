@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Cal+Sans&family=Silkscreen:wght@400;700&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  --accent: hsl(154, 100%, 48%);
+  --bg: hsl(220, 8%, 15%);
+  --bg-dark: hsl(260, 6%, 10%);
+}
+
+html,
+body {
+  overflow-x: hidden;
+  font-family: 'Silkscreen', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+button {
+  border: 0;
+  outline: 0;
+}
+
+.container {
+  overflow: hidden;
+  width: 300px;
+  background-color: var(--accent);
+  padding-left: 0.75rem;
+
+  .github {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+    color: var(--bg);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+.container.mobile {
+  width: 100vw;
+  padding: 1rem;
+}
+
+.settings {
+  background-color: var(--bg);
+  padding-top: 0.5rem;
+}
+
+/* Toggle Button Styles */
+.setting {
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+}
+
+.toggle-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  background-color: #cf8585;
+  border-radius: 0px;
+  transition: background-color 0.3s;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--bg-dark);
+  border-radius: 0px;
+  transition: transform 0.3s;
+}
+
+.toggle-checkbox:checked + .toggle-switch {
+  background-color: var(--accent); /* Accent color when checked */
+}
+
+.toggle-checkbox:checked + .toggle-switch::before {
+  transform: translateX(18px);
+}
+
+.toggle-text {
+  color: #cccccc;
+}

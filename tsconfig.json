@@ -1,0 +1,19 @@
+{
+   "compilerOptions": {
+      "strict": true,
+      "module": "preserve",
+      "noEmit": true,
+      "target": "ESNext",
+      "lib": ["es2022", "dom", "dom.iterable"],
+      //  "sourceMap": true,
+      // "rootDir": "./src",
+      "jsx": "react-jsx",
+      "downlevelIteration": true,
+      "noEmitOnError": true,
+      "allowJs": true,
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "types": ["chrome-types", "firefox-webext-browser"]
+   },
+   "exclude": ["node_modules", "public", "dist", "./src/*.js", "*.js"]
+}
