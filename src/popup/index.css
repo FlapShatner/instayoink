@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  --accent: hsl(154, 100%, 48%);
+  --accent: rgb(0, 245, 139);
   --bg: hsl(220, 8%, 15%);
   --bg-dark: hsl(260, 6%, 10%);
 }

@@ -100,6 +100,26 @@ function App() {
       });
   }, []);
 
+  const handleUseHashIdChange = () => {
+    if (useHashId) {
+      setUseIndexing(false);
+      chrome.storage.sync.set({ setting_format_use_indexing: false });
+    }
+  };
+
+  const handleUseIndexingChange = () => {
+    if (useHashId) {
+      setUseIndexing(false);
+      chrome.storage.sync.set({ setting_format_use_indexing: false });
+    }
+  };
+  useEffect(() => {
+    if (useHashId) {
+      setUseIndexing(false);
+      chrome.storage.sync.set({ setting_format_use_indexing: false });
+    }
+  }, [useHashId]);
+
   return (
     <>
       <main className={'container ' + (isMobile ? 'mobile' : '')}>
@@ -117,10 +137,37 @@ function App() {
 
         <div className="settings">
           <SettingItem
+            value={newTab}
+            setValue={setNewTab}
+            label="Show `open in new tab` Icon"
+            id="setting_show_open_in_new_tab_icon"
+          />
+          <SettingItem
             value={replaceJpegWithJpg}
             setValue={setReplaceJpegWithJpg}
             label="Replace .jpeg With .jpg"
             id="setting_format_replace_jpeg_with_jpg"
+          />
+          {/* <SettingItem
+            value={useHashId}
+            setValue={setUseHashId}
+            label="Replace Original ID With Shorter Value"
+            id="setting_format_use_hash_id"
+            onChange={handleUseHashIdChange}
+          /> */}
+
+          {/* <SettingItem
+            value={useIndexing}
+            setValue={setUseIndexing}
+            label="Append the index of the media to the end of filename. Shorter ID cannot be used."
+            id="setting_format_use_indexing"
+            onChange={handleUseIndexingChange}
+          /> */}
+          <SettingItem
+            value={enableVideoControl}
+            setValue={setEnableVideoControl}
+            label="Show Video Controls"
+            id="setting_enable_video_controls"
           />
           <SettingItem
             value={threads}

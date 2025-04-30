@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Instagram Downloader",
-  "version": "__MSG_extVersion__",
-  "description": "Help users download images and videos easily on Instagram",
-  "homepage_url": "https://github.com/TheKonka/instagram-download-browser-extension",
+  "name": "InstaYoink",
+  "version": "1.0.0",
+  "description": "Download images and videos from Instagram and Threads",
+  "homepage_url": "https://github.com/FlapShatner/instayoink",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -20,7 +20,7 @@
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"
     },
-    "default_title": "Instagram Downloader",
+    "default_title": "InstaYoink",
     "default_popup": "popup/index.html"
   },
   "host_permissions": [
@@ -35,13 +35,11 @@
     "webRequestFilterResponse"
   ],
   "background": {
-    "scripts": [
-      "background/firefox.js"
-    ]
+    "scripts": ["background/firefox.js"]
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "1094918@gmail.com"
+      "id": "jrobertswebdev@gmail.com"
     },
     "gecko_android": {
       "strict_min_version": "120.0a1"
@@ -49,13 +47,8 @@
   },
   "content_scripts": [
     {
-      "js": [
-        "content/index.js"
-      ],
-      "matches": [
-        "https://www.instagram.com/*",
-        "https://www.threads.net/*"
-      ]
+      "js": ["content/index.js"],
+      "matches": ["https://www.instagram.com/*", "https://www.threads.net/*"]
     }
   ]
 }
