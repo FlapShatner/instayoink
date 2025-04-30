@@ -71,10 +71,10 @@ function createCustomBtn(
   newBtn.className = CLASS_CUSTOM_BUTTON + ' ' + className;
   newBtn.setAttribute('style', `cursor: pointer;z-index: 0;color:${iconColor}`);
   newBtn.onmouseenter = () => {
-    newBtn.style.setProperty('filter', 'drop-shadow(0px 0px 10px deepskyblue)');
+    newBtn.style.setProperty('opacity', '0.6');
   };
   newBtn.onmouseleave = () => {
-    newBtn.style.removeProperty('filter');
+    newBtn.style.removeProperty('opacity');
   };
   if (className === 'newtab-btn') {
     newBtn.setAttribute('title', 'Open In New Tab');

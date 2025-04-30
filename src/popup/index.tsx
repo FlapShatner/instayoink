@@ -59,7 +59,7 @@ const GithubIcon: React.FC<{
 };
 
 function App() {
-  const [newTab, setNewTab] = useState<boolean>(true);
+  const [newTab, setNewTab] = useState<boolean>(false);
   const [threads, setThreads] = useState<boolean>(true);
   const [enableVideoControl, setEnableVideoControl] = useState<boolean>(true);
   const [replaceJpegWithJpg, setReplaceJpegWithJpg] = useState<boolean>(true);
@@ -136,12 +136,12 @@ function App() {
         </div>
 
         <div className="settings">
-          <SettingItem
+          {/* <SettingItem
             value={newTab}
             setValue={setNewTab}
             label="Show `open in new tab` Icon"
             id="setting_show_open_in_new_tab_icon"
-          />
+          /> */}
           <SettingItem
             value={replaceJpegWithJpg}
             setValue={setReplaceJpegWithJpg}
