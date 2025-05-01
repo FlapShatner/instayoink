@@ -4,7 +4,7 @@ import type { ReelsMedia } from '../types/global';
 import { saveHighlights, saveProfileReel, saveReels, saveStories } from './fn';
 
 browser.runtime.onInstalled.addListener(async () => {
-  const result = await chrome.storage.sync.get(CONFIG_LIST);
+  const result = await browser.storage.sync.get(CONFIG_LIST);
   CONFIG_LIST.forEach((i) => {
     if (i === 'setting_show_open_in_new_tab_icon') {
       browser.storage.sync.set({

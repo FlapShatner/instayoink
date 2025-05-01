@@ -60,7 +60,7 @@ function findValueByKey(obj: Record<string, any>, key: string): any {
 
 chrome.runtime.onMessageExternal.addListener(
   (message, sender, sendResponse) => {
-    // console.log(message, sender);
+    console.log(message, sender);
 
     const { type, data, api } = message;
 
@@ -105,7 +105,7 @@ chrome.runtime.onMessageExternal.addListener(
       } else {
         try {
           const jsonData = JSON.parse(data);
-
+          console.log('jsonData', jsonData);
           switch (api) {
             case 'https://www.instagram.com/api/graphql':
               saveStories(jsonData);

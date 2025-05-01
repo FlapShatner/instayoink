@@ -11,6 +11,6 @@ export const CONFIG_LIST = [
 export const DEFAULT_FILENAME_FORMAT = `{username}-{id}-{datetime}`;
 export const DEFAULT_DATETIME_FORMAT = 'YYYY-MM-DD_hh:mm:ss';
 
-export const EXTENSION_ID = 'oejjpeobjicdpgaijialfpfcbdnanajk';
+export const EXTENSION_ID = 'cefefedmkcjnojhnekdhkepfckbcmbgc';
 
 export const CLASS_CUSTOM_BUTTON = 'custom-btn';
