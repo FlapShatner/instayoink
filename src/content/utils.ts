@@ -38,6 +38,7 @@ export interface DownloadParams {
   username?: string;
   datetime?: string | null | Dayjs;
   fileId?: string;
+  profile?: boolean;
 }
 
 function hashCode(str: string) {
@@ -55,6 +56,7 @@ export async function downloadResource({
   username,
   datetime,
   fileId,
+  profile = false,
 }: DownloadParams) {
   console.log(`Downloading ${url}`);
 
@@ -71,7 +73,7 @@ export async function downloadResource({
   ]);
 
   // When setting_format_use_hash_id is true, we will hash the fileId. The mediaIndex will be meaningless.
-  if (setting_format_use_hash_id && fileId) {
+  if (setting_format_use_hash_id && fileId && !profile) {
     fileId = hashCode(fileId).toString();
   }
 
@@ -99,7 +101,7 @@ export async function downloadResource({
       .replace(/{datetime}/g, datetime) // This replacement is safe even if {datetime} was removed
       .replace(/{id}/g, fileId);
   }
-
+  console.log('filename', filename);
   if (!filename) {
     filename = getMediaName(url);
   }

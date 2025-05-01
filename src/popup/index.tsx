@@ -156,13 +156,13 @@ function App() {
             label="Append datetime to filename"
             id="setting_format_use_datetime"
           />
-          {/* <SettingItem
+          <SettingItem
             value={useHashId}
             setValue={setUseHashId}
-            label="Replace Original ID With Shorter Value"
+            label="Use short ID in filename"
             id="setting_format_use_hash_id"
             onChange={handleUseHashIdChange}
-          /> */}
+          />
 
           {/* <SettingItem
             value={useIndexing}
