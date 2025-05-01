@@ -65,6 +65,7 @@ function App() {
   const [replaceJpegWithJpg, setReplaceJpegWithJpg] = useState<boolean>(true);
   const [useHashId, setUseHashId] = useState<boolean>(false);
   const [useIndexing, setUseIndexing] = useState<boolean>(true);
+  const [useDatetime, setUseDatetime] = useState<boolean>(true);
 
   const [fileNameFormat, setFileNameFormat] = useState<string>(
     DEFAULT_FILENAME_FORMAT
@@ -86,6 +87,7 @@ function App() {
       setReplaceJpegWithJpg(!!res.setting_format_replace_jpeg_with_jpg);
       setUseHashId(!!res.setting_format_use_hash_id);
       setUseIndexing(!!res.setting_format_use_indexing);
+      setUseDatetime(!!res.setting_format_use_datetime);
     });
 
     chrome.storage.sync
@@ -145,8 +147,14 @@ function App() {
           <SettingItem
             value={replaceJpegWithJpg}
             setValue={setReplaceJpegWithJpg}
-            label="Replace .jpeg With .jpg"
+            label="Replace .jpeg with .jpg"
             id="setting_format_replace_jpeg_with_jpg"
+          />
+          <SettingItem
+            value={useDatetime}
+            setValue={setUseDatetime}
+            label="Append datetime to filename"
+            id="setting_format_use_datetime"
           />
           {/* <SettingItem
             value={useHashId}
@@ -163,16 +171,16 @@ function App() {
             id="setting_format_use_indexing"
             onChange={handleUseIndexingChange}
           /> */}
-          <SettingItem
+          {/* <SettingItem
             value={enableVideoControl}
             setValue={setEnableVideoControl}
             label="Show Video Controls"
             id="setting_enable_video_controls"
-          />
+          /> */}
           <SettingItem
             value={threads}
             setValue={setThreads}
-            label="Enable Threads Download"
+            label="Enable Threads download"
             id="setting_enable_threads"
           />
         </div>
