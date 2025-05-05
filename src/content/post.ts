@@ -171,7 +171,7 @@ export async function postOnClicked(target: HTMLAnchorElement) {
     const data = await postGetUrl(articleNode);
     if (!data?.url) throw new Error('Cannot get url');
     const { url, res, mediaIndex } = data;
-    console.log('post url=', url);
+    // console.log('post url=', url);
     if (target.className.includes('download-btn')) {
       let postTime, posterName, fileId;
       if (res) {

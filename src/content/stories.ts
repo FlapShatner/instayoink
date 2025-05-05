@@ -102,7 +102,7 @@ export async function storyOnClicked(target: HTMLAnchorElement) {
 
   // no media_id in url
   if (pathnameArr.length === 2) {
-    console.log('no media_id in url');
+    // console.log('no media_id in url');
     let mediaIndex = 0;
     const steps =
       target.parentElement!.firstElementChild!.querySelectorAll(':scope>div');
@@ -117,7 +117,7 @@ export async function storyOnClicked(target: HTMLAnchorElement) {
 
     // when open the page from an empty tab, data return with html but not xhr
     if (window.history.length <= 2) {
-      console.log('window.history.length <= 2');
+      // console.log('window.history.length <= 2');
       for (const script of window.document.scripts) {
         try {
           const innerHTML = script.innerHTML;
@@ -136,12 +136,12 @@ export async function storyOnClicked(target: HTMLAnchorElement) {
     const { stories_user_ids } = await chrome.storage.local.get([
       'stories_user_ids',
     ]);
-    console.log('stories_user_ids', stories_user_ids);
+    // console.log('stories_user_ids', stories_user_ids);
     const user_id = new Map(stories_user_ids).get(posterName);
 
     if (typeof user_id === 'string') {
       const item = stories_reels_media_data.get(user_id);
-      console.log('item', item);
+      // console.log('item', item);
       if (item && steps.length === item.items.length) {
         const result = handleMedia(item, mediaIndex);
         if (result) return;

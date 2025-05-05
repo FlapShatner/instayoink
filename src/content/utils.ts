@@ -80,9 +80,9 @@ export async function downloadResource({
   let filename = fileId;
 
   if (username && datetime && fileId) {
-    console.log(
-      `username: ${username}, datetime: ${datetime}, fileId: ${fileId}`
-    );
+    // console.log(
+    //   `username: ${username}, datetime: ${datetime}, fileId: ${fileId}`
+    // );
     if (setting_format_use_datetime) {
       datetime = dayjs(datetime).format(setting_format_datetime);
     }
@@ -101,7 +101,7 @@ export async function downloadResource({
       .replace(/{datetime}/g, datetime) // This replacement is safe even if {datetime} was removed
       .replace(/{id}/g, fileId);
   }
-  console.log('filename', filename);
+  // console.log('filename', filename);
   if (!filename) {
     filename = getMediaName(url);
   }
@@ -232,7 +232,7 @@ export const getUrlFromInfoApi = async (
     }
     const infoJson = mediaInfoCache.get(mediaId);
     const data = infoJson.items[0];
-    console.log(data);
+    console.log('infoJson', data);
     if ('carousel_media' in data) {
       // multi-media post
       const item = data.carousel_media[Math.max(mediaIdx, 0)];

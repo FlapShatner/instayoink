@@ -280,7 +280,7 @@ browser.runtime.onInstalled.addListener(async () => {
 });
 
 browser.runtime.onMessage.addListener((message, sender) => {
-  console.log(message, sender);
+  // console.log(message, sender);
   const { type, data } = message;
   if (type === 'open_url') {
     browser.tabs.create({ url: data, index: sender.tab!.index + 1 });
