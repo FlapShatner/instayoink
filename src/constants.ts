@@ -6,6 +6,7 @@ export const CONFIG_LIST = [
   'setting_format_use_hash_id',
   'setting_format_use_indexing',
   'setting_format_use_datetime',
+  'setting_enable_download_multiple_media',
 ];
 
 export const DEFAULT_FILENAME_FORMAT = `{username}-{id}-{datetime}`;

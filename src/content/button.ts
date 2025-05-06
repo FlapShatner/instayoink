@@ -14,6 +14,8 @@ const svgDownloadBtn = `<svg xmlns="http://www.w3.org/2000/svg" style="padding:4
 
 const svgNewtabBtn = `<svg xmlns="http://www.w3.org/2000/svg" style="padding: 4px;" width="30" height="30"  x="0px" y="0px" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5" d="m8 16l8-8m0 0v5m0-5h-5M5.4 3h13.2A2.4 2.4 0 0 1 21 5.4v13.2a2.4 2.4 0 0 1-2.4 2.4H5.4A2.4 2.4 0 0 1 3 18.6V5.4A2.4 2.4 0 0 1 5.4 3"/></svg>`;
 
+const svgDownloadMultipleBtn = `<svg xmlns="http://www.w3.org/2000/svg" style="padding:4px;" width="30" height="30"  x="0px" y="0px"  viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75l3 3m0 0l3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"/></svg>`;
+
 function onClickHandler(e: MouseEvent) {
   // handle button click
   e.stopPropagation();

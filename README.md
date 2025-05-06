@@ -1,4 +1,5 @@
 # instayoink
+![banner](assets/1280x800%20(3).png)
 Browser extension which adds a download button for images and videos on Instagram and Threads
 
 ### Screenshots

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { DEFAULT_DATETIME_FORMAT, DEFAULT_FILENAME_FORMAT } from '../constants';
+import { createZip } from './zip';
 
 export function openInNewTab(url: string) {
   try {
@@ -80,9 +81,9 @@ export async function downloadResource({
   let filename = fileId;
 
   if (username && datetime && fileId) {
-    // console.log(
-    //   `username: ${username}, datetime: ${datetime}, fileId: ${fileId}`
-    // );
+    console.log(
+      `username: ${username}, datetime: ${datetime}, fileId: ${fileId}`
+    );
     if (setting_format_use_datetime) {
       datetime = dayjs(datetime).format(setting_format_datetime);
     }
@@ -101,7 +102,7 @@ export async function downloadResource({
       .replace(/{datetime}/g, datetime) // This replacement is safe even if {datetime} was removed
       .replace(/{id}/g, fileId);
   }
-  // console.log('filename', filename);
+  console.log('filename', filename);
   if (!filename) {
     filename = getMediaName(url);
   }
@@ -196,6 +197,21 @@ export const getUrlFromInfoApi = async (
   mediaIdx = 0
 ): Promise<Record<string, any> | null> => {
   try {
+    const {
+      setting_enable_download_multiple_media,
+      setting_format_datetime = DEFAULT_DATETIME_FORMAT,
+      setting_format_filename = DEFAULT_FILENAME_FORMAT,
+      setting_format_use_hash_id,
+      setting_format_use_datetime,
+      setting_format_replace_jpeg_with_jpg,
+    } = await chrome.storage.sync.get([
+      'setting_enable_download_multiple_media',
+      'setting_format_datetime',
+      'setting_format_filename',
+      'setting_format_use_hash_id',
+      'setting_format_use_datetime',
+      'setting_format_replace_jpeg_with_jpg',
+    ]);
     const appId = findAppId();
     if (!appId) {
       console.log('Cannot find appid');
@@ -232,9 +248,25 @@ export const getUrlFromInfoApi = async (
     }
     const infoJson = mediaInfoCache.get(mediaId);
     const data = infoJson.items[0];
-    console.log('infoJson', data);
+    console.log(data);
     if ('carousel_media' in data) {
       // multi-media post
+      if (setting_enable_download_multiple_media) {
+        console.log('Downloading multiple media items as zip...');
+        const items = data.carousel_media.map((i: any) => ({
+          ...i,
+          url: getImgOrVideoUrl(i),
+          taken_at: data.taken_at,
+          owner: i.owner?.username || data.owner.username,
+          coauthor_producers:
+            data.coauthor_producers?.map((i: any) => i.username) || [],
+          origin_data: data,
+        }));
+        // return items;
+        console.log('items', items);
+        return null;
+      }
+
       const item = data.carousel_media[Math.max(mediaIdx, 0)];
       return {
         ...item,
