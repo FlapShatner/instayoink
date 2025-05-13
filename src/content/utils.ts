@@ -285,11 +285,11 @@ export const getUrlFromInfoApi = async (articleNode: HTMLElement, mediaIdx = 0):
  try {
   const {
    setting_enable_download_multiple_media,
-   setting_format_datetime = DEFAULT_DATETIME_FORMAT,
-   setting_format_filename = DEFAULT_FILENAME_FORMAT,
-   setting_format_use_hash_id,
-   setting_format_use_datetime,
-   setting_format_replace_jpeg_with_jpg,
+   //  setting_format_datetime = DEFAULT_DATETIME_FORMAT,
+   //  setting_format_filename = DEFAULT_FILENAME_FORMAT,
+   //  setting_format_use_hash_id,
+   //  setting_format_use_datetime,
+   //  setting_format_replace_jpeg_with_jpg,
   } = await chrome.storage.sync.get([
    'setting_enable_download_multiple_media',
    'setting_format_datetime',
@@ -376,15 +376,15 @@ export const getUrlFromInfoApi = async (articleNode: HTMLElement, mediaIdx = 0):
  }
 }
 
-function adjustVideoButton(btns: NodeListOf<Element>) {
- btns.forEach((i) => {
-  const btn = i.parentNode?.parentNode?.parentNode?.parentNode
-  if (btn instanceof HTMLElement) {
-   btn.style.zIndex = '999'
-   btn.style.bottom = '3rem'
-  }
- })
-}
+// function adjustVideoButton(btns: NodeListOf<Element>) {
+//  btns.forEach((i) => {
+//   const btn = i.parentNode?.parentNode?.parentNode?.parentNode
+//   if (btn instanceof HTMLElement) {
+//    btn.style.zIndex = '999'
+//    btn.style.bottom = '3rem'
+//   }
+//  })
+// }
 
 export function getParentArticleNode(node: HTMLElement | null) {
  if (node === null) return null
