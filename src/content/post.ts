@@ -36,13 +36,13 @@ async function postGetUrl(articleNode: HTMLElement) {
  if (articleNode.querySelectorAll('li[style][class]').length === 0) {
   // single img or video
   res = await getUrlFromInfoApi(articleNode)
-  console.log('postGetUrl1 res=', res)
+  // console.log('postGetUrl1 res=', res)
   if (Array.isArray(res)) {
    const arr = res.map((item) => ({
     url: item.url,
     res: item,
    }))
-   console.log('postGetUrl1 arr=', arr)
+   //  console.log('postGetUrl1 arr=', arr)
    return arr
   }
   url = res?.url
@@ -99,13 +99,13 @@ async function postGetUrl(articleNode: HTMLElement) {
    }
   }
   res = await getUrlFromInfoApi(articleNode, mediaIndex)
-  console.log('postGetUrl2 res=', res)
+  // console.log('postGetUrl2 res=', res)
   if (Array.isArray(res)) {
    const arr = res.map((item) => ({
     url: item.url,
     res: item,
    }))
-   console.log('postGetUrl2 arr=', arr)
+   //  console.log('postGetUrl2 arr=', arr)
    return arr
   }
 

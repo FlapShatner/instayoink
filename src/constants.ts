@@ -10,7 +10,7 @@ export const CONFIG_LIST = [
 ]
 
 export const DEFAULT_FILENAME_FORMAT = `{username}-{id}-{datetime}`
-export const DEFAULT_DATETIME_FORMAT = 'YYYY-MM-DD_hh:mm:ss'
+export const DEFAULT_DATETIME_FORMAT = 'YYYY-MM-DD_hh-mm-ss'
 
 // local extension id
 export const EXTENSION_ID = 'cefefedmkcjnojhnekdhkepfckbcmbgc'

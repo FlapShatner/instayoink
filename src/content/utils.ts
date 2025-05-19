@@ -49,6 +49,13 @@ function hashCode(str: string) {
 }
 
 export async function handleDownloadMany(data: any) {
+ const {
+  setting_format_datetime = DEFAULT_DATETIME_FORMAT,
+  setting_format_filename = DEFAULT_FILENAME_FORMAT,
+  setting_format_use_hash_id,
+  setting_format_use_datetime,
+ } = await chrome.storage.sync.get(['setting_format_datetime', 'setting_format_filename', 'setting_format_use_hash_id', 'setting_format_use_datetime'])
+
  const zip = new JSZip()
  for (const item of data) {
   if (item.url) {
@@ -56,24 +63,25 @@ export async function handleDownloadMany(data: any) {
    const { url, res } = item
    let posterName, postTime, fileId
    if (res) {
-    posterName = res.owner?.username || res.user?.username // Added fallback for user.username
-    postTime = dayjs.unix(res.taken_at)
+    posterName = res.owner
+    postTime = res.taken_at
     fileId = res.id || getMediaName(url)
    } else {
     console.log('Err: not find media details in handleDownloadMany for item:', item)
-    // Fallback if res is not available
     posterName = 'unknown_user'
-    postTime = dayjs() // Use current time as a fallback
-    fileId = getMediaName(url) || `media_${Date.now()}` // Fallback fileId from URL or timestamp
+    postTime = dayjs()
+    fileId = getMediaName(url) || `media_${Date.now()}`
    }
+   console.log('posterName', posterName, 'postTime', postTime, 'fileId', fileId)
    const resource = await downloadResource({
     url: url,
     username: posterName,
-    datetime: dayjs(postTime), // postTime is already a Dayjs object here
+    datetime: dayjs.unix(postTime),
     fileId: fileId,
     multiple: true,
    })
    if (resource && resource.data && resource.filename && resource.extension) {
+    console.log('Adding file to zip:', resource.filename, resource.extension)
     zip.file(`${resource.filename}.${resource.extension}`, resource.data)
    } else {
     console.warn('Failed to get resource or resource parts missing for zipping item:', item.url, resource)
@@ -123,16 +131,13 @@ export async function downloadResource({
 
  if (username && datetime && fileId) {
   console.log(`username: ${username}, datetime: ${datetime}, fileId: ${fileId}`)
-  let formattedDatetime = datetime // datetime is Dayjs object or string/null
+  let formattedDatetime = datetime
   if (setting_format_use_datetime) {
    if (dayjs(datetime).isValid()) {
-    // Check if datetime is valid before formatting
     formattedDatetime = dayjs(datetime).format(setting_format_datetime)
    } else {
-    // If datetime is invalid but setting_format_use_datetime is true,
-    // decide on a fallback or leave as is (which might be an invalid date string)
-    // For now, it will use the original invalid 'datetime' if formatting fails.
-    // Or, one could choose to not include datetime in filename if it's invalid.
+    console.warn(`Invalid datetime format: ${datetime}`)
+    formattedDatetime = dayjs().format(setting_format_datetime)
    }
   }
 
@@ -147,7 +152,7 @@ export async function downloadResource({
    .replace(/{datetime}/g, String(formattedDatetime)) // Ensure formattedDatetime is string for replace
    .replace(/{id}/g, fileId)
  }
- console.log('filename', calculatedFilename) // Original log was 'filename'
+ console.log('filename', calculatedFilename, 'getMediaName', getMediaName(url))
  if (!calculatedFilename) {
   calculatedFilename = getMediaName(url)
  }
@@ -334,7 +339,7 @@ export const getUrlFromInfoApi = async (articleNode: HTMLElement, mediaIdx = 0):
   }
   const infoJson = mediaInfoCache.get(mediaId)
   const data = infoJson.items[0]
-  console.log(data)
+  // console.log(data)
   if ('carousel_media' in data) {
    // multi-media post
    if (setting_enable_download_multiple_media) {
@@ -347,8 +352,7 @@ export const getUrlFromInfoApi = async (articleNode: HTMLElement, mediaIdx = 0):
      coauthor_producers: i.coauthor_producers?.map((i: any) => i.username) || [],
      origin_data: i,
     }))
-    // return items;
-    console.log('items', items)
+    // console.log('items', items)
     return items
    }
 
