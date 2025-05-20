@@ -13,9 +13,9 @@ export const DEFAULT_FILENAME_FORMAT = `{username}-{id}-{datetime}`
 export const DEFAULT_DATETIME_FORMAT = 'YYYY-MM-DD_hh-mm-ss'
 
 // local extension id
-export const EXTENSION_ID = 'cefefedmkcjnojhnekdhkepfckbcmbgc'
+// export const EXTENSION_ID = 'cefefedmkcjnojhnekdhkepfckbcmbgc'
 
 // store extension id
-// export const EXTENSION_ID = 'immfpkjakbknecheoampmdjpnigaoend';
+export const EXTENSION_ID = 'immfpkjakbknecheoampmdjpnigaoend'
 
 export const CLASS_CUSTOM_BUTTON = 'custom-btn'
