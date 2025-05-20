@@ -66,6 +66,8 @@ function App() {
   const [useHashId, setUseHashId] = useState<boolean>(false);
   const [useIndexing, setUseIndexing] = useState<boolean>(true);
   const [useDatetime, setUseDatetime] = useState<boolean>(true);
+  const [enableDownloadMultipleMedia, setEnableDownloadMultipleMedia] =
+    useState<boolean>(true);
 
   const [fileNameFormat, setFileNameFormat] = useState<string>(
     DEFAULT_FILENAME_FORMAT
@@ -88,6 +90,9 @@ function App() {
       setUseHashId(!!res.setting_format_use_hash_id);
       setUseIndexing(!!res.setting_format_use_indexing);
       setUseDatetime(!!res.setting_format_use_datetime);
+      setEnableDownloadMultipleMedia(
+        !!res.setting_enable_download_multiple_media
+      );
     });
 
     chrome.storage.sync
@@ -163,7 +168,12 @@ function App() {
             id="setting_format_use_hash_id"
             onChange={handleUseHashIdChange}
           />
-
+          <SettingItem
+            value={enableDownloadMultipleMedia}
+            setValue={setEnableDownloadMultipleMedia}
+            label="Download all media in post"
+            id="setting_enable_download_multiple_media"
+          />
           {/* <SettingItem
             value={useIndexing}
             setValue={setUseIndexing}
@@ -177,12 +187,12 @@ function App() {
             label="Show Video Controls"
             id="setting_enable_video_controls"
           /> */}
-          <SettingItem
+          {/* <SettingItem
             value={threads}
             setValue={setThreads}
             label="Enable Threads download"
             id="setting_enable_threads"
-          />
+          /> */}
         </div>
       </main>
     </>

@@ -60,7 +60,7 @@ function findValueByKey(obj: Record<string, any>, key: string): any {
 
 chrome.runtime.onMessageExternal.addListener(
   (message, sender, sendResponse) => {
-    console.log(message, sender);
+    // console.log(message, sender);
 
     const { type, data, api } = message;
 

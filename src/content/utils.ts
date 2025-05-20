@@ -1,290 +1,409 @@
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
-import { DEFAULT_DATETIME_FORMAT, DEFAULT_FILENAME_FORMAT } from '../constants';
+import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
+import { DEFAULT_DATETIME_FORMAT, DEFAULT_FILENAME_FORMAT } from '../constants'
+import JSZip from 'jszip'
 
 export function openInNewTab(url: string) {
-  try {
-    chrome.runtime.sendMessage({ type: 'open_url', data: url });
-  } catch {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
+ try {
+  chrome.runtime.sendMessage({ type: 'open_url', data: url })
+ } catch {
+  window.open(url, '_blank', 'noopener,noreferrer')
+ }
 }
 
-async function forceDownload(
-  blob: string,
-  filename: string,
-  extension: string
-) {
-  const { setting_format_replace_jpeg_with_jpg } =
-    await chrome.storage.sync.get(['setting_format_replace_jpeg_with_jpg']);
-  if (setting_format_replace_jpeg_with_jpg) {
-    extension = extension.replace('jpeg', 'jpg');
-  }
-  const a = document.createElement('a');
-  a.download = filename + '.' + extension;
-  a.href = blob;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+async function forceDownload(blob: string, filename: string, extension: string) {
+ const { setting_format_replace_jpeg_with_jpg } = await chrome.storage.sync.get(['setting_format_replace_jpeg_with_jpg'])
+ if (setting_format_replace_jpeg_with_jpg) {
+  extension = extension.replace('jpeg', 'jpg')
+ }
+ const a = document.createElement('a')
+ a.download = filename + '.' + extension
+ a.href = blob
+ document.body.appendChild(a)
+ a.click()
+ a.remove()
 }
 
 export function getMediaName(url: string) {
-  const name = url.split('?')[0].split('/').pop();
-  return name ? name.substring(0, name.lastIndexOf('.')) : url;
+ const name = url.split('?')[0].split('/').pop()
+ return name ? name.substring(0, name.lastIndexOf('.')) : url
 }
 
 export interface DownloadParams {
-  url: string;
-  username?: string;
-  datetime?: string | null | Dayjs;
-  fileId?: string;
-  profile?: boolean;
+ url: string
+ username?: string
+ datetime?: string | null | Dayjs
+ fileId?: string
+ profile?: boolean
+ multiple?: boolean
 }
 
 function hashCode(str: string) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
+ let hash = 0
+ for (let i = 0; i < str.length; i++) {
+  const char = str.charCodeAt(i)
+  hash = (hash << 5) - hash + char
+  hash = hash & hash
+ }
+ return hash >>> 0
+}
+
+export async function handleDownloadMany(data: any) {
+ const {
+  setting_format_datetime = DEFAULT_DATETIME_FORMAT,
+  setting_format_filename = DEFAULT_FILENAME_FORMAT,
+  setting_format_use_hash_id,
+  setting_format_use_datetime,
+ } = await chrome.storage.sync.get(['setting_format_datetime', 'setting_format_filename', 'setting_format_use_hash_id', 'setting_format_use_datetime'])
+
+ const zip = new JSZip()
+ for (const item of data) {
+  if (item.url) {
+   console.log('handledownloadmany item', item)
+   const { url, res } = item
+   let posterName, postTime, fileId
+   if (res) {
+    posterName = res.owner
+    postTime = res.taken_at
+    fileId = res.id || getMediaName(url)
+   } else {
+    console.log('Err: not find media details in handleDownloadMany for item:', item)
+    posterName = 'unknown_user'
+    postTime = dayjs()
+    fileId = getMediaName(url) || `media_${Date.now()}`
+   }
+   console.log('posterName', posterName, 'postTime', postTime, 'fileId', fileId)
+   const resource = await downloadResource({
+    url: url,
+    username: posterName,
+    datetime: dayjs.unix(postTime),
+    fileId: fileId,
+    multiple: true,
+   })
+   if (resource && resource.data && resource.filename && resource.extension) {
+    console.log('Adding file to zip:', resource.filename, resource.extension)
+    zip.file(`${resource.filename}.${resource.extension}`, resource.data)
+   } else {
+    console.warn('Failed to get resource or resource parts missing for zipping item:', item.url, resource)
+   }
   }
-  return hash >>> 0;
+ }
+ const content = await zip.generateAsync({ type: 'blob' })
+ if (Object.keys(zip.files).length === 0) {
+  console.warn('Zip file is empty. No files were added. Aborting download.')
+  // Optionally, notify the user via UI: alert("No media could be prepared for download.");
+  return
+ }
+ const blob = new Blob([content], { type: 'application/zip' })
+ const url = URL.createObjectURL(blob)
+ const a = document.createElement('a')
+ a.href = url
+ a.download = `IG_Media_${Date.now()}.zip`
+ document.body.appendChild(a)
+ a.click()
+ document.body.removeChild(a)
+ URL.revokeObjectURL(url)
 }
 
 export async function downloadResource({
-  url,
-  username,
-  datetime,
-  fileId,
-  profile = false,
-}: DownloadParams) {
-  console.log(`Downloading ${url}`);
+ url,
+ username,
+ datetime,
+ fileId,
+ profile = false,
+ multiple = false,
+}: DownloadParams): Promise<{ data: Blob; filename: string; extension: string } | null | void> {
+ //  console.log(`Downloading ${url}`)
 
-  const {
-    setting_format_datetime = DEFAULT_DATETIME_FORMAT,
-    setting_format_filename = DEFAULT_FILENAME_FORMAT,
-    setting_format_use_hash_id,
-    setting_format_use_datetime,
-  } = await chrome.storage.sync.get([
-    'setting_format_datetime',
-    'setting_format_filename',
-    'setting_format_use_hash_id',
-    'setting_format_use_datetime',
-  ]);
+ const {
+  setting_format_datetime = DEFAULT_DATETIME_FORMAT,
+  setting_format_filename = DEFAULT_FILENAME_FORMAT,
+  setting_format_use_hash_id,
+  setting_format_use_datetime,
+ } = await chrome.storage.sync.get(['setting_format_datetime', 'setting_format_filename', 'setting_format_use_hash_id', 'setting_format_use_datetime'])
 
-  // When setting_format_use_hash_id is true, we will hash the fileId. The mediaIndex will be meaningless.
-  if (setting_format_use_hash_id && fileId && !profile) {
-    fileId = hashCode(fileId).toString();
+ // When setting_format_use_hash_id is true, we will hash the fileId. The mediaIndex will be meaningless.
+ if (setting_format_use_hash_id && fileId && !profile) {
+  fileId = hashCode(fileId).toString()
+ }
+
+ let calculatedFilename = fileId
+
+ if (username && datetime && fileId) {
+  console.log(`username: ${username}, datetime: ${datetime}, fileId: ${fileId}`)
+  let formattedDatetime = datetime
+  if (setting_format_use_datetime) {
+   if (dayjs(datetime).isValid()) {
+    formattedDatetime = dayjs(datetime).format(setting_format_datetime)
+   } else {
+    console.warn(`Invalid datetime format: ${datetime}`)
+    formattedDatetime = dayjs().format(setting_format_datetime)
+   }
   }
 
-  let filename = fileId;
+  let effectiveFilenameFormat = setting_format_filename
+  if (!setting_format_use_datetime) {
+   // Remove {datetime} and adjacent separators (hyphen or underscore)
+   effectiveFilenameFormat = effectiveFilenameFormat.replace(/[_-]?{datetime}[_-]?/g, '')
+  }
 
-  if (username && datetime && fileId) {
-    // console.log(
-    //   `username: ${username}, datetime: ${datetime}, fileId: ${fileId}`
-    // );
-    if (setting_format_use_datetime) {
-      datetime = dayjs(datetime).format(setting_format_datetime);
+  calculatedFilename = effectiveFilenameFormat
+   .replace(/{username}/g, username)
+   .replace(/{datetime}/g, String(formattedDatetime)) // Ensure formattedDatetime is string for replace
+   .replace(/{id}/g, fileId)
+ }
+ console.log('filename', calculatedFilename, 'getMediaName', getMediaName(url))
+ if (!calculatedFilename) {
+  calculatedFilename = getMediaName(url)
+ }
+
+ if (multiple) {
+  try {
+   const response = await fetch(url, {
+    headers: !url.startsWith('blob:') ? new Headers({ Origin: location.origin }) : undefined,
+    mode: !url.startsWith('blob:') ? 'cors' : undefined,
+   })
+   if (!response.ok) {
+    console.error(`Failed to fetch ${url} for zipping: ${response.status} ${response.statusText}`)
+    return null
+   }
+   const blobData = await response.blob()
+   let extension = blobData.type.split('/').pop()?.toLowerCase() || 'bin'
+
+   if (extension === 'bin' || extension === 'octet-stream' || blobData.type === '') {
+    const urlPath = new URL(url).pathname // Use URL for robust path parsing
+    const urlExt = urlPath.substring(urlPath.lastIndexOf('.') + 1).toLowerCase()
+    if (['jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm', 'mov'].includes(urlExt)) {
+     extension = urlExt
     }
+   }
 
-    let effectiveFilenameFormat = setting_format_filename;
-    if (!setting_format_use_datetime) {
-      // Remove {datetime} and adjacent separators (hyphen or underscore)
-      effectiveFilenameFormat = effectiveFilenameFormat.replace(
-        /[_-]?{datetime}[_-]?/g,
-        ''
-      );
-    }
+   const { setting_format_replace_jpeg_with_jpg } = await chrome.storage.sync.get(['setting_format_replace_jpeg_with_jpg'])
+   if (setting_format_replace_jpeg_with_jpg && extension === 'jpeg') {
+    extension = 'jpg'
+   }
+   if (extension === '' || extension === 'octet-stream') extension = 'bin' // Final fallback for extension
 
-    filename = effectiveFilenameFormat
-      .replace(/{username}/g, username)
-      .replace(/{datetime}/g, datetime) // This replacement is safe even if {datetime} was removed
-      .replace(/{id}/g, fileId);
+   return { data: blobData, filename: calculatedFilename, extension }
+  } catch (e) {
+   console.error(`Error in downloadResource (multiple: true) for ${url}:`, e)
+   return null
   }
-  // console.log('filename', filename);
-  if (!filename) {
-    filename = getMediaName(url);
-  }
+ } else {
+  // Logic for single download (multiple: false)
   if (url.startsWith('blob:')) {
-    forceDownload(url, filename, 'mp4');
-    return;
+   forceDownload(url, calculatedFilename, 'mp4') // Kept original 'mp4' for this specific path
+   return
   }
   fetch(url, {
-    headers: new Headers({
-      Origin: location.origin,
-    }),
-    mode: 'cors',
+   headers: new Headers({
+    Origin: location.origin,
+   }),
+   mode: 'cors',
   })
-    .then((response) => response.blob())
-    .then((blob) => {
-      const extension = blob.type.split('/').pop();
-      const blobUrl = window.URL.createObjectURL(blob);
-      forceDownload(blobUrl, filename, extension || 'jpg');
-    })
-    .catch((e) => console.error(e));
+   .then(async (response) => {
+    // Added async here to await chrome.storage.sync.get
+    if (!response.ok) {
+     throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    return response.blob()
+   })
+   .then(async (blob) => {
+    // Added async here
+    let extension = blob.type.split('/').pop()?.toLowerCase() // Added toLowerCase for consistency
+    const { setting_format_replace_jpeg_with_jpg } = await chrome.storage.sync.get(['setting_format_replace_jpeg_with_jpg'])
+    if (setting_format_replace_jpeg_with_jpg && extension === 'jpeg') {
+     extension = 'jpg'
+    }
+    const blobUrl = window.URL.createObjectURL(blob)
+    forceDownload(blobUrl, calculatedFilename, extension || 'jpg')
+   })
+   .catch((e) => console.error(`Error in downloadResource (single download) for ${url}:`, e))
+  return // This path does not return a value to its direct caller in an awaited context
+ }
 }
 
-const mediaInfoCache: Map<string, any> = new Map(); // key: media id, value: info json
-const mediaIdCache: Map<string, string> = new Map(); // key: post id, value: media id
+const mediaInfoCache: Map<string, any> = new Map() // key: media id, value: info json
+const mediaIdCache: Map<string, string> = new Map() // key: post id, value: media id
 
 const findAppId = () => {
-  const appIdPattern = /"X-IG-App-ID":"([\d]+)"/;
-  const bodyScripts: NodeListOf<HTMLScriptElement> =
-    document.querySelectorAll('body > script');
-  for (let i = 0; i < bodyScripts.length; ++i) {
-    const match = bodyScripts[i].text.match(appIdPattern);
-    if (match) return match[1];
-  }
-  console.log('Cannot find app id');
-  return null;
-};
+ const appIdPattern = /"X-IG-App-ID":"([\d]+)"/
+ const bodyScripts: NodeListOf<HTMLScriptElement> = document.querySelectorAll('body > script')
+ for (let i = 0; i < bodyScripts.length; ++i) {
+  const match = bodyScripts[i].text.match(appIdPattern)
+  if (match) return match[1]
+ }
+ console.log('Cannot find app id')
+ return null
+}
 
 function findPostId(articleNode: HTMLElement) {
-  const pathname = window.location.pathname;
-  if (pathname.startsWith('/reels/')) {
-    return pathname.split('/')[2];
-  } else if (pathname.startsWith('/stories/')) {
-    return pathname.split('/')[3];
-  } else if (pathname.startsWith('/reel/')) {
-    return pathname.split('/')[2];
+ const pathname = window.location.pathname
+ if (pathname.startsWith('/reels/')) {
+  return pathname.split('/')[2]
+ } else if (pathname.startsWith('/stories/')) {
+  return pathname.split('/')[3]
+ } else if (pathname.startsWith('/reel/')) {
+  return pathname.split('/')[2]
+ }
+ const postIdPattern = /^\/p\/([^/]+)\//
+ const aNodes = articleNode.querySelectorAll('a')
+ for (let i = 0; i < aNodes.length; ++i) {
+  const link = aNodes[i].getAttribute('href')
+  if (link) {
+   const match = link.match(postIdPattern)
+   if (match) return match[1]
   }
-  const postIdPattern = /^\/p\/([^/]+)\//;
-  const aNodes = articleNode.querySelectorAll('a');
-  for (let i = 0; i < aNodes.length; ++i) {
-    const link = aNodes[i].getAttribute('href');
-    if (link) {
-      const match = link.match(postIdPattern);
-      if (match) return match[1];
-    }
-  }
-  return null;
+ }
+ return null
 }
 
 const findMediaId = async (postId: string) => {
-  const mediaIdPattern =
-    /instagram:\/\/media\?id=(\d+)|["' ]media_id["' ]:["' ](\d+)["' ]/;
-  const match = window.location.href.match(
-    /www.instagram.com\/stories\/[^/]+\/(\d+)/
-  );
-  if (match) return match[1];
-  if (!mediaIdCache.has(postId)) {
-    const postUrl = `https://www.instagram.com/p/${postId}/`;
-    const resp = await fetch(postUrl);
-    const text = await resp.text();
-    const idMatch = text.match(mediaIdPattern);
-    if (!idMatch) return null;
-    let mediaId = null;
-    for (let i = 0; i < idMatch.length; ++i) {
-      if (idMatch[i]) mediaId = idMatch[i];
-    }
-    if (!mediaId) return null;
-    mediaIdCache.set(postId, mediaId);
+ const mediaIdPattern = /instagram:\/\/media\?id=(\d+)|["' ]media_id["' ]:["' ](\d+)["' ]/
+ const match = window.location.href.match(/www.instagram.com\/stories\/[^/]+\/(\d+)/)
+ if (match) return match[1]
+ if (!mediaIdCache.has(postId)) {
+  const postUrl = `https://www.instagram.com/p/${postId}/`
+  const resp = await fetch(postUrl)
+  const text = await resp.text()
+  const idMatch = text.match(mediaIdPattern)
+  if (!idMatch) return null
+  let mediaId = null
+  for (let i = 0; i < idMatch.length; ++i) {
+   if (idMatch[i]) mediaId = idMatch[i]
   }
-  return mediaIdCache.get(postId);
-};
-
-const getImgOrVideoUrl = (item: Record<string, any>) => {
-  if ('video_versions' in item) {
-    return item.video_versions[0].url;
-  } else {
-    return item.image_versions2.candidates[0].url;
-  }
-};
-
-export const getUrlFromInfoApi = async (
-  articleNode: HTMLElement,
-  mediaIdx = 0
-): Promise<Record<string, any> | null> => {
-  try {
-    const appId = findAppId();
-    if (!appId) {
-      console.log('Cannot find appid');
-      return null;
-    }
-    const postId = findPostId(articleNode);
-    if (!postId) {
-      console.log('Cannot find post id');
-      return null;
-    }
-    const mediaId = await findMediaId(postId);
-    if (!mediaId) {
-      console.log('Cannot find media id');
-      return null;
-    }
-    if (!mediaInfoCache.has(mediaId)) {
-      const url = 'https://i.instagram.com/api/v1/media/' + mediaId + '/info/';
-      const resp = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Accept: '*/*',
-          'X-IG-App-ID': appId,
-        },
-        credentials: 'include',
-        mode: 'cors',
-      });
-
-      if (resp.status !== 200) {
-        console.log(`Fetch info API failed with status code: ${resp.status}`);
-        return null;
-      }
-      const respJson = await resp.json();
-      mediaInfoCache.set(mediaId, respJson);
-    }
-    const infoJson = mediaInfoCache.get(mediaId);
-    const data = infoJson.items[0];
-    console.log('infoJson', data);
-    if ('carousel_media' in data) {
-      // multi-media post
-      const item = data.carousel_media[Math.max(mediaIdx, 0)];
-      return {
-        ...item,
-        url: getImgOrVideoUrl(item),
-        taken_at: data.taken_at,
-        owner: item.owner?.username || data.owner.username,
-        coauthor_producers:
-          data.coauthor_producers?.map((i: any) => i.username) || [],
-        origin_data: data,
-      };
-    } else {
-      // single media post
-      return {
-        ...data,
-        url: getImgOrVideoUrl(data),
-        owner: data.owner.username,
-        coauthor_producers:
-          data.coauthor_producers?.map((i: any) => i.username) || [],
-      };
-    }
-  } catch (e: any) {
-    console.log(`Uncaught in getUrlFromInfoApi(): ${e}\n${e.stack}`);
-    return null;
-  }
-};
-
-function adjustVideoButton(btns: NodeListOf<Element>) {
-  btns.forEach((i) => {
-    const btn = i.parentNode?.parentNode?.parentNode?.parentNode;
-    if (btn instanceof HTMLElement) {
-      btn.style.zIndex = '999';
-      btn.style.bottom = '3rem';
-    }
-  });
+  if (!mediaId) return null
+  mediaIdCache.set(postId, mediaId)
+ }
+ return mediaIdCache.get(postId)
 }
 
-export function getParentArticleNode(node: HTMLElement | null) {
-  if (node === null) return null;
-  if (node.tagName === 'ARTICLE') {
-    return node;
+const getImgOrVideoUrl = (item: Record<string, any>) => {
+ if ('video_versions' in item) {
+  return item.video_versions[0].url
+ } else {
+  return item.image_versions2.candidates[0].url
+ }
+}
+
+export const getUrlFromInfoApi = async (articleNode: HTMLElement, mediaIdx = 0): Promise<Record<string, any> | Record<string, any>[] | null> => {
+ try {
+  const {
+   setting_enable_download_multiple_media,
+   //  setting_format_datetime = DEFAULT_DATETIME_FORMAT,
+   //  setting_format_filename = DEFAULT_FILENAME_FORMAT,
+   //  setting_format_use_hash_id,
+   //  setting_format_use_datetime,
+   //  setting_format_replace_jpeg_with_jpg,
+  } = await chrome.storage.sync.get([
+   'setting_enable_download_multiple_media',
+   'setting_format_datetime',
+   'setting_format_filename',
+   'setting_format_use_hash_id',
+   'setting_format_use_datetime',
+   'setting_format_replace_jpeg_with_jpg',
+  ])
+  const appId = findAppId()
+  if (!appId) {
+   console.log('Cannot find appid')
+   return null
   }
-  return getParentArticleNode(node.parentElement);
+  const postId = findPostId(articleNode)
+  if (!postId) {
+   console.log('Cannot find post id')
+   return null
+  }
+  const mediaId = await findMediaId(postId)
+  if (!mediaId) {
+   console.log('Cannot find media id')
+   return null
+  }
+  if (!mediaInfoCache.has(mediaId)) {
+   const url = 'https://i.instagram.com/api/v1/media/' + mediaId + '/info/'
+   const resp = await fetch(url, {
+    method: 'GET',
+    headers: {
+     Accept: '*/*',
+     'X-IG-App-ID': appId,
+    },
+    credentials: 'include',
+    mode: 'cors',
+   })
+
+   if (resp.status !== 200) {
+    console.log(`Fetch info API failed with status code: ${resp.status}`)
+    return null
+   }
+   const respJson = await resp.json()
+   mediaInfoCache.set(mediaId, respJson)
+  }
+  const infoJson = mediaInfoCache.get(mediaId)
+  const data = infoJson.items[0]
+  // console.log(data)
+  if ('carousel_media' in data) {
+   // multi-media post
+   if (setting_enable_download_multiple_media) {
+    console.log('Downloading multiple media items as zip...')
+    const items = data.carousel_media.map((i: any) => ({
+     ...i,
+     url: getImgOrVideoUrl(i),
+     taken_at: i.taken_at,
+     owner: i.owner?.username || data.owner.username,
+     coauthor_producers: i.coauthor_producers?.map((i: any) => i.username) || [],
+     origin_data: i,
+    }))
+    // console.log('items', items)
+    return items
+   }
+
+   const item = data.carousel_media[Math.max(mediaIdx, 0)]
+   return {
+    ...item,
+    url: getImgOrVideoUrl(item),
+    taken_at: data.taken_at,
+    owner: item.owner?.username || data.owner.username,
+    coauthor_producers: data.coauthor_producers?.map((i: any) => i.username) || [],
+    origin_data: data,
+   }
+  } else {
+   // single media post
+   return {
+    ...data,
+    url: getImgOrVideoUrl(data),
+    owner: data.owner.username,
+    coauthor_producers: data.coauthor_producers?.map((i: any) => i.username) || [],
+   }
+  }
+ } catch (e: any) {
+  console.log(`Uncaught in getUrlFromInfoApi(): ${e}\n${e.stack}`)
+  return null
+ }
+}
+
+// function adjustVideoButton(btns: NodeListOf<Element>) {
+//  btns.forEach((i) => {
+//   const btn = i.parentNode?.parentNode?.parentNode?.parentNode
+//   if (btn instanceof HTMLElement) {
+//    btn.style.zIndex = '999'
+//    btn.style.bottom = '3rem'
+//   }
+//  })
+// }
+
+export function getParentArticleNode(node: HTMLElement | null) {
+ if (node === null) return null
+ if (node.tagName === 'ARTICLE') {
+  return node
+ }
+ return getParentArticleNode(node.parentElement)
 }
 
 export function getParentSectionNode(node: HTMLElement | null) {
-  if (node === null) return null;
-  if (node.tagName === 'SECTION') {
-    return node;
-  }
-  return getParentSectionNode(node.parentElement);
+ if (node === null) return null
+ if (node.tagName === 'SECTION') {
+  return node
+ }
+ return getParentSectionNode(node.parentElement)
 }
 
 // export async function handleVideo() {
@@ -318,31 +437,23 @@ export function getParentSectionNode(node: HTMLElement | null) {
 // }
 
 export const checkType = () => {
-  if (
-    navigator &&
-    navigator.userAgent &&
-    /Mobi|Android|iPhone/i.test(navigator.userAgent)
-  ) {
-    if (
-      navigator &&
-      navigator.userAgent &&
-      /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)
-    ) {
-      return 'ios';
-    } else {
-      return 'android';
-    }
+ if (navigator && navigator.userAgent && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+  if (navigator && navigator.userAgent && /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)) {
+   return 'ios'
   } else {
-    return 'pc';
+   return 'android'
   }
-};
+ } else {
+  return 'pc'
+ }
+}
 
 export async function fetchHtml() {
-  const resp = await fetch(window.location.href, {
-    referrerPolicy: 'no-referrer',
-  });
-  const content = await resp.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(content, 'text/html');
-  return doc.querySelectorAll('script');
+ const resp = await fetch(window.location.href, {
+  referrerPolicy: 'no-referrer',
+ })
+ const content = await resp.text()
+ const parser = new DOMParser()
+ const doc = parser.parseFromString(content, 'text/html')
+ return doc.querySelectorAll('script')
 }
